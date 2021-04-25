@@ -21,20 +21,19 @@ class CrossWord_GUI:
         self.WIDTH = self.HEIGHT = 750 
         self.SCREEN = pygame.display.set_mode((self.WIDTH, self.HEIGHT))
 
-        self.SMALL_FONT = pygame.font.SysFont('ariel', 5)
+        self.SMALL_FONT = pygame.font.SysFont('Arial', 18)
+        self.CLOCK = pygame.time.Clock()
+
 
 
     def play_game(self):
-        
-        self.SCREEN.fill((255, 255, 255))
+        self.CLOCK.tick(60)
+    
+        blue_rect = pygame.Rect(0, 0, 48, 48)
         run = True
         while run:
 
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    run = False
-                    sys.exit
-
+            self.SCREEN.fill((255, 255, 255))
             num = 50
             for x in range(15):
                 pygame.draw.line(self.SCREEN, (0, 0, 0), (num, 0), (num, 750), width= 3)
@@ -47,18 +46,39 @@ class CrossWord_GUI:
             for row, string in enumerate(self.DATA.row_list):
                 for col, dot in enumerate(string):
                     if dot == '.':
-                        pygame.draw.rect(self.SCREEN, (0, 0, 0), pygame.Rect(50*row, 50*col, 50, 50))
-            
+                        pygame.draw.rect(self.SCREEN, (0, 0, 0), pygame.Rect(50*col, 50*row, 50, 50))
+                        
             row = 0
-            for index, num in enumerate(self.DATA.grid_num_list, start= 1):
+            index = 1
+            for num in self.DATA.grid_num_list:
+                
+                if num != 0:
+                    num_txt = self.SMALL_FONT.render(str(num), True, (0, 0, 0))
+                    self.SCREEN.blit(num_txt, ((50*(index-1)+5), (50*row)+5))
+
                 if index % 15 == 0:
                     row+=1
-                    if num != 0:
-                        
-                        num_txt = self.SMALL_FONT.render(str(num), False, (0, 0, 0))
-                        num_txt_rect = num_txt.get_rect()
-                        num_txt_rect.center = (50*row, 50*index)
-                        self.SCREEN.blit(num_txt, num_txt_rect) 
+                    index = 0 
+                
+                index+=1 
+
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    run = False
+                    sys.exit
+                
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_w or event.key == pygame.K_UP:
+                        blue_rect.y += 50 
+                    if event.key == pygame.K_s or event.key == pygame.K_DOWN:
+                        blue_rect.y -= 50
+                
+
+
+            
+            
+            
+            self.SCREEN.blit()
 
             pygame.display.update()
 
