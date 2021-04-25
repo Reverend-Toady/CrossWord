@@ -1,5 +1,5 @@
-import json
-import pygame, sys
+import json, sys
+import pygame
 from pygame.locals import *
 
 
@@ -14,7 +14,7 @@ class CRW_Dataset:
         self.grid_num_list = dataset['gridnums']
 
 class CrossWord_GUI:
-    def __init__(self, dataset):
+    def __init__(self, dataset, empty_grid):
         pygame.display.set_caption('Cross Word')
         
         self.DATA = CRW_Dataset(dataset)
@@ -22,18 +22,25 @@ class CrossWord_GUI:
         self.SCREEN = pygame.display.set_mode((self.WIDTH, self.HEIGHT))
 
         self.SMALL_FONT = pygame.font.SysFont('Arial', 18)
+        self.YEXT_FONT = pygame.font.SysFont('Arial', 24)
         self.CLOCK = pygame.time.Clock()
 
+        self.GRID = empty_grid
 
+    def ifValidInput(self, y, x, alphabet):
+        if self.BOARD[(y//50)][(x//50)] != '.':
+           self.BOARD[(y//50)][(x//50)] = alphabet 
 
     def play_game(self):
-        self.CLOCK.tick(60)
-    
-        blue_rect = pygame.Rect(0, 0, 48, 48)
+        dist = 50
+        
+        blue_rect = pygame.Rect(0, 0, 50, 50)
         run = True
         while run:
+            self.CLOCK.tick(60)
 
             self.SCREEN.fill((255, 255, 255))
+
             num = 50
             for x in range(15):
                 pygame.draw.line(self.SCREEN, (0, 0, 0), (num, 0), (num, 750), width= 3)
@@ -68,17 +75,21 @@ class CrossWord_GUI:
                     sys.exit
                 
                 if event.type == pygame.KEYDOWN:
-                    if event.key == pygame.K_w or event.key == pygame.K_UP:
-                        blue_rect.y += 50 
-                    if event.key == pygame.K_s or event.key == pygame.K_DOWN:
-                        blue_rect.y -= 50
-                
+                    if event.key == pygame.K_UP:
+                        blue_rect.y -= dist
+                    elif event.key == pygame.K_DOWN:
+                        blue_rect.y += dist
+                    elif event.key == pygame.K_LEFT:
+                        blue_rect.x -= dist
+                    elif event.key == pygame.K_RIGHT:
+                        blue_rect.x += dist 
 
+                    if event.key == pygame.K_a:
+                        self.ifValidInput(blue_rect.y, blue_rect.x, 'A')
 
             
-            
-            
-            self.SCREEN.blit()
+            pygame.draw.rect(self.SCREEN, (0, 0, 255), blue_rect, 3)
+
 
             pygame.display.update()
 
@@ -89,7 +100,17 @@ if __name__ == '__main__':
     with open('dataset.json', 'r') as f:
         dataset = json.load(f)
 
-    crw = CrossWord_GUI(dataset)
+    x = ''.join([x for x in dataset['grid']])
+    empty_grid = []
+    for i in x:
+        if i != '.':
+            l = i.replace(i, ' ')
+            empty_grid.append(l)
+        else: empty_grid.append(i)  
+
+    actual_grid = [empty_grid[i:i+15] for i in range(0, len(empty_grid), 15)]
+
+    crw = CrossWord_GUI(dataset, actual_grid)
     crw.play_game()
 
 
